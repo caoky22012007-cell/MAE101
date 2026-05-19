@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trắc nghiệm: Ma trận nghịch đảo</title>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;background:#f4f6fb;color:#1a1a2e;min-height:100vh;padding:2rem 1rem}
+  .container{max-width:780px;margin:0 auto}
+
+  /* Header */
+  .header{text-align:center;margin-bottom:2.5rem}
+  .header h1{font-size:1.7rem;font-weight:700;color:#1e3a8a;margin-bottom:.4rem}
+  .header p{color:#64748b;font-size:.95rem}
+  .scoreboard{display:flex;gap:1rem;justify-content:center;margin-top:1.2rem;flex-wrap:wrap}
+  .score-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:.6rem 1.4rem;text-align:center;min-width:90px}
+  .score-card .num{font-size:1.6rem;font-weight:700}
+  .score-card .lbl{font-size:.72rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em}
+  .num.correct{color:#16a34a} .num.wrong{color:#dc2626} .num.total{color:#1e3a8a}
+
+  /* Progress */
+  .progress-wrap{background:#e2e8f0;border-radius:99px;height:6px;margin-bottom:2rem;overflow:hidden}
+  .progress-bar{height:100%;background:linear-gradient(90deg,#3b82f6,#1e40af);border-radius:99px;transition:width .4s}
+
+  /* Question card */
+  .q-card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:1.6rem 1.8rem;margin-bottom:1.4rem;transition:box-shadow .2s}
+  .q-card:hover{box-shadow:0 4px 20px rgba(30,58,138,.07)}
+  .q-num{font-size:.78rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem}
+  .q-text{font-size:1rem;line-height:1.7;color:#1a1a2e;margin-bottom:1.1rem}
+
+  /* Options */
+  .options{display:flex;flex-direction:column;gap:.55rem}
+  .opt{display:flex;align-items:flex-start;gap:.75rem;padding:.75rem 1rem;border:1.5px solid #e2e8f0;border-radius:10px;cursor:pointer;transition:all .18s;background:#fff;text-align:left;font-size:.93rem;line-height:1.6;color:#1a1a2e;position:relative;width:100%}
+  .opt:hover:not(.locked){border-color:#93c5fd;background:#eff6ff}
+  .opt-letter{min-width:26px;height:26px;border-radius:50%;border:1.5px solid #cbd5e1;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:600;color:#64748b;flex-shrink:0;transition:all .18s}
+  .opt-text{flex:1;padding-top:1px}
+
+  /* States */
+  .opt.correct-ans{border-color:#16a34a;background:#f0fdf4}
+  .opt.correct-ans .opt-letter{background:#16a34a;border-color:#16a34a;color:#fff}
+  .opt.wrong-ans{border-color:#dc2626;background:#fef2f2}
+  .opt.wrong-ans .opt-letter{background:#dc2626;border-color:#dc2626;color:#fff}
+  .opt.show-correct{border-color:#16a34a;background:#f0fdf4}
+  .opt.show-correct .opt-letter{background:#16a34a;border-color:#16a34a;color:#fff}
+  .opt.locked{cursor:default}
+
+  /* Explanation */
+  .explanation{margin-top:1rem;padding:.9rem 1.1rem;border-radius:10px;font-size:.88rem;line-height:1.65;display:none}
+  .explanation.show{display:block}
+  .explanation.exp-correct{background:#f0fdf4;border-left:3px solid #16a34a;color:#14532d}
+  .explanation.exp-wrong{background:#fef2f2;border-left:3px solid #dc2626;color:#7f1d1d}
+  .exp-title{font-weight:600;margin-bottom:.35rem;display:flex;align-items:center;gap:.4rem}
+
+  /* Result panel */
+  .result-panel{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:2rem;text-align:center;margin-top:1rem;display:none}
+  .result-panel.show{display:block}
+  .result-emoji{font-size:3.5rem;margin-bottom:.8rem}
+  .result-title{font-size:1.4rem;font-weight:700;color:#1e3a8a;margin-bottom:.4rem}
+  .result-sub{color:#64748b;margin-bottom:1.2rem;font-size:.95rem}
+  .result-bar-wrap{background:#e2e8f0;border-radius:99px;height:10px;margin-bottom:1.5rem;overflow:hidden}
+  .result-bar{height:100%;border-radius:99px;transition:width 1s .3s}
+  .btn-retry{background:#1e3a8a;color:#fff;border:none;border-radius:10px;padding:.7rem 2rem;font-size:.95rem;font-weight:600;cursor:pointer;transition:background .18s}
+  .btn-retry:hover{background:#1e40af}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <h1>📐 Trắc nghiệm: Ma trận nghịch đảo</h1>
+    <p>10 câu hỏi — bấm chọn đáp án để xem giải thích ngay</p>
+    <div class="scoreboard">
+      <div class="score-card"><div class="num total" id="s-done">0</div><div class="lbl">Đã làm</div></div>
+      <div class="score-card"><div class="num correct" id="s-ok">0</div><div class="lbl">Đúng</div></div>
+      <div class="score-card"><div class="num wrong" id="s-err">0</div><div class="lbl">Sai</div></div>
+    </div>
+  </div>
+
+  <div class="progress-wrap"><div class="progress-bar" id="prog" style="width:0%"></div></div>
+
+  <div id="quiz"></div>
+
+  <div class="result-panel" id="result">
+    <div class="result-emoji" id="r-emoji">🎉</div>
+    <div class="result-title" id="r-title"></div>
+    <div class="result-sub" id="r-sub"></div>
+    <div class="result-bar-wrap"><div class="result-bar" id="r-bar"></div></div>
+    <button class="btn-retry" onclick="retry()">🔄 Làm lại từ đầu</button>
+  </div>
+
+</div>
+
+<script>
+const Q=[
+  {
+    q:"Ma trận nghịch đảo $A^{-1}$ được dùng để giải quyết bài toán nào dưới đây?",
+    opts:[
+      "Tính định thức của ma trận $A$",
+      "Tìm vector $\\mathbf{x}$ khi biết $A\\mathbf{x}=\\mathbf{b}$ và chỉ có $\\mathbf{b}$",
+      "Nhân hai ma trận $A$ và $B$",
+      "Tính tổng các phần tử của $A$"
+    ],
+    ans:1,
+    exp:"Khi ma trận $A$ tác động lên vector $\\mathbf{x}$ tạo ra $\\mathbf{b}$, tức $A\\mathbf{x}=\\mathbf{b}$, nếu ta chỉ biết $\\mathbf{b}$ và muốn tìm lại $\\mathbf{x}$, ta cần phép biến đổi ngược: $\\mathbf{x}=A^{-1}\\mathbf{b}$. Đó chính là lý do tồn tại của ma trận nghịch đảo."
+  },
+  {
+    q:"Điều kiện cần và đủ để ma trận vuông $A$ có nghịch đảo là:",
+    opts:[
+      "$\\det(A) = 1$",
+      "$\\det(A) > 0$",
+      "$\\det(A) \\neq 0$",
+      "Tất cả phần tử của $A$ đều khác 0"
+    ],
+    ans:2,
+    exp:"Ma trận $A$ khả nghịch (có nghịch đảo) khi và chỉ khi $\\det(A)\\neq 0$. Nếu $\\det(A)=0$, ma trận được gọi là suy biến — nó \"xẹp\" không gian và không thể đảo ngược. Lưu ý: $\\det(A)=1$ hay $\\det(A)>0$ là điều kiện mạnh hơn, không phải điều kiện cần."
+  },
+  {
+    q:"Minor $M_{ij}$ của phần tử ở hàng $i$, cột $j$ trong ma trận $A$ là:",
+    opts:[
+      "Giá trị của phần tử $a_{ij}$",
+      "Định thức của ma trận con thu được khi xóa hàng $i$ và cột $j$ khỏi $A$",
+      "Cofactor của phần tử $a_{ij}$",
+      "Tổng các phần tử trên hàng $i$"
+    ],
+    ans:1,
+    exp:"Minor $M_{ij}$ là định thức của ma trận con còn lại sau khi ta bỏ đi toàn bộ hàng $i$ và cột $j$ khỏi $A$. Đây là bước trung gian quan trọng để tính cofactor. Minor khác cofactor ở chỗ chưa có dấu $(-1)^{i+j}$."
+  },
+  {
+    q:"Cofactor $C_{ij}$ liên hệ với minor $M_{ij}$ qua công thức:",
+    opts:[
+      "$C_{ij} = M_{ij}$",
+      "$C_{ij} = i \\cdot j \\cdot M_{ij}$",
+      "$C_{ij} = (-1)^{i+j} M_{ij}$",
+      "$C_{ij} = \\dfrac{M_{ij}}{\\det(A)}$"
+    ],
+    ans:2,
+    exp:"Cofactor $C_{ij}=(-1)^{i+j}M_{ij}$. Thừa số $(-1)^{i+j}$ tạo ra bàn cờ dấu: dương tại $(1,1),(1,3),(2,2),\\ldots$ và âm tại $(1,2),(2,1),\\ldots$ Chính dấu này đảm bảo khai triển theo hàng/cột cho định thức đúng giá trị."
+  },
+  {
+    q:"Giá trị của $(-1)^{i+j}$ tại vị trí hàng 2, cột 3 (tức $i=2, j=3$) là:",
+    opts:[
+      "$+1$",
+      "$-1$",
+      "$0$",
+      "Phụ thuộc vào giá trị phần tử"
+    ],
+    ans:1,
+    exp:"$(-1)^{2+3}=(-1)^5=-1$. Ta kiểm tra: $i+j=5$ là lẻ nên dấu âm. Quy tắc nhớ nhanh: bàn cờ dấu bắt đầu bằng $+$ ở góc trên trái $(1,1)$, rồi xen kẽ $+/-$ như ô cờ vua."
+  },
+  {
+    q:"Ma trận Adjugate $\\operatorname{adj}(A)$ được định nghĩa là:",
+    opts:[
+      "Ma trận gồm tất cả các minor $M_{ij}$",
+      "Ma trận cofactor $C$ chuyển vị, tức $C^T$",
+      "Ma trận $A$ nhân với $\\det(A)$",
+      "Ma trận đơn vị $I$"
+    ],
+    ans:1,
+    exp:"$\\operatorname{adj}(A)=C^T$, trong đó $C$ là ma trận cofactor (ghép tất cả $C_{ij}$ vào đúng vị trí). Bước chuyển vị — đổi hàng thành cột — là bắt buộc để đảm bảo $A\\cdot A^{-1}=I$, vì phép nhân ma trận kết hợp hàng của ma trận trái với cột của ma trận phải."
+  },
+  {
+    q:"Công thức tính ma trận nghịch đảo $A^{-1}$ là:",
+    opts:[
+      "$A^{-1} = \\det(A) \\cdot \\operatorname{adj}(A)$",
+      "$A^{-1} = \\dfrac{\\operatorname{adj}(A)}{\\det(A)}$",
+      "$A^{-1} = \\operatorname{adj}(A) - \\det(A)$",
+      "$A^{-1} = \\dfrac{\\det(A)}{\\operatorname{adj}(A)}$"
+    ],
+    ans:1,
+    exp:"Công thức chuẩn: $A^{-1}=\\dfrac{1}{\\det(A)}\\operatorname{adj}(A)$, tức chia từng phần tử của $\\operatorname{adj}(A)$ cho $\\det(A)$. Lưu ý: $\\dfrac{1}{\\det(A)}$ là số vô hướng, còn $\\operatorname{adj}(A)$ là ma trận — ta không thể \"chia\" ma trận cho ma trận theo nghĩa thông thường."
+  },
+  {
+    q:"Cho ma trận $A=\\begin{pmatrix}2&1\\\\5&3\\end{pmatrix}$. Giá trị $\\det(A)$ là:",
+    opts:[
+      "$1$",
+      "$11$",
+      "$-1$",
+      "$6$"
+    ],
+    ans:0,
+    exp:"$\\det(A)=2\\times3-1\\times5=6-5=1$. Vì $\\det(A)=1\\neq0$ nên $A$ có nghịch đảo. Đặc biệt, khi $\\det(A)=1$, $A^{-1}=\\operatorname{adj}(A)$ (không cần chia)."
+  },
+  {
+    q:"Cho $A=\\begin{pmatrix}1&2\\\\3&4\\end{pmatrix}$. Ma trận Adjugate $\\operatorname{adj}(A)$ là:",
+    opts:[
+      "$\\begin{pmatrix}4&-2\\\\-3&1\\end{pmatrix}$",
+      "$\\begin{pmatrix}4&-3\\\\-2&1\\end{pmatrix}$",
+      "$\\begin{pmatrix}1&-2\\\\-3&4\\end{pmatrix}$",
+      "$\\begin{pmatrix}-4&2\\\\3&-1\\end{pmatrix}$"
+    ],
+    ans:0,
+    exp:"Các cofactor: $C_{11}=+4,\\ C_{12}=-3,\\ C_{21}=-2,\\ C_{22}=+1$. Ma trận cofactor $C=\\begin{pmatrix}4&-3\\\\-2&1\\end{pmatrix}$. Chuyển vị: $\\operatorname{adj}(A)=C^T=\\begin{pmatrix}4&-2\\\\-3&1\\end{pmatrix}$. Chú ý: nhiều học sinh nhầm quên bước chuyển vị, dẫn đến chọn đáp án B."
+  },
+  {
+    q:"Trong quy trình tính $A^{-1}$, thứ tự đúng của các bước là:",
+    opts:[
+      "Adjugate $\\to$ Cofactor $\\to$ Minor $\\to$ Định thức",
+      "Định thức $\\to$ Minor $\\to$ Cofactor $\\to$ Adjugate $\\to A^{-1}$",
+      "Cofactor $\\to$ Minor $\\to$ Định thức $\\to$ Adjugate",
+      "Minor $\\to$ Định thức $\\to$ Adjugate $\\to$ Cofactor"
+    ],
+    ans:1,
+    exp:"Quy trình chuẩn gồm 5 bước: (1) tính $\\det(A)$ — kiểm tra khả nghịch; (2) tính mọi minor $M_{ij}$ — xóa hàng/cột; (3) tính cofactor $C_{ij}=(-1)^{i+j}M_{ij}$ — thêm dấu; (4) lập ma trận adjugate $\\operatorname{adj}(A)=C^T$ — chuyển vị; (5) áp công thức $A^{-1}=\\frac{1}{\\det}\\operatorname{adj}(A)$."
+  }
+];
+
+let done=0,ok=0,err=0;
+
+function build(){
+  const el=document.getElementById('quiz');
+  el.innerHTML='';
+  Q.forEach((q,i)=>{
+    const div=document.createElement('div');
+    div.className='q-card';
+    div.id='qc'+i;
+    const letters=['A','B','C','D'];
+    div.innerHTML=`
+      <div class="q-num">Câu ${i+1} / ${Q.length}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="options" id="opts${i}">
+        ${q.opts.map((o,j)=>`
+          <button class="opt" id="opt${i}_${j}" onclick="pick(${i},${j})">
+            <span class="opt-letter">${letters[j]}</span>
+            <span class="opt-text">${o}</span>
+          </button>`).join('')}
+      </div>
+      <div class="explanation" id="exp${i}">
+        <div class="exp-title" id="exptitle${i}"></div>
+        <div id="exptxt${i}"></div>
+      </div>`;
+    el.appendChild(div);
+  });
+  if(window.MathJax) MathJax.typesetPromise();
+}
+
+function pick(qi,oi){
+  const q=Q[qi];
+  if(document.getElementById('opt'+qi+'_0').classList.contains('locked')) return;
+
+  const isRight=(oi===q.ans);
+  if(isRight) ok++; else err++;
+  done++;
+
+  document.getElementById('s-done').textContent=done;
+  document.getElementById('s-ok').textContent=ok;
+  document.getElementById('s-err').textContent=err;
+  document.getElementById('prog').style.width=(done/Q.length*100)+'%';
+
+  for(let j=0;j<4;j++){
+    const btn=document.getElementById('opt'+qi+'_'+j);
+    btn.classList.add('locked');
+    if(j===q.ans) btn.classList.add(isRight&&j===oi?'correct-ans':'show-correct');
+    if(!isRight&&j===oi) btn.classList.add('wrong-ans');
+  }
+
+  const exp=document.getElementById('exp'+qi);
+  const title=document.getElementById('exptitle'+qi);
+  const txt=document.getElementById('exptxt'+qi);
+
+  exp.classList.add('show','exp-'+(isRight?'correct':'wrong'));
+  title.innerHTML=isRight?'✅ Chính xác!':'❌ Chưa đúng — đáp án là <strong>'+['A','B','C','D'][q.ans]+'</strong>';
+  txt.innerHTML=q.exp;
+
+  if(window.MathJax) MathJax.typesetPromise([exp]);
+
+  if(done===Q.length) setTimeout(showResult,600);
+}
+
+function showResult(){
+  const pct=Math.round(ok/Q.length*100);
+  const panel=document.getElementById('result');
+  panel.classList.add('show');
+  let emoji='😊',title='',sub='';
+  if(pct===100){emoji='🏆';title='Xuất sắc! Tuyệt vời!';sub='Bạn nắm vững toàn bộ kiến thức về ma trận nghịch đảo!';}
+  else if(pct>=80){emoji='🎉';title='Rất tốt!';sub='Bạn hiểu tốt chủ đề này. Ôn lại vài điểm nhỏ là hoàn hảo.';}
+  else if(pct>=60){emoji='📚';title='Khá ổn!';sub='Cần ôn thêm một số khái niệm. Đọc lại phần giải thích nhé.';}
+  else{emoji='💪';title='Cần cố gắng thêm!';sub='Hãy đọc lại bài giảng rồi thử lại — bạn sẽ làm được!';}
+  document.getElementById('r-emoji').textContent=emoji;
+  document.getElementById('r-title').textContent=title+' '+ok+'/'+Q.length+' câu đúng ('+pct+'%)';
+  document.getElementById('r-sub').textContent=sub;
+  const bar=document.getElementById('r-bar');
+  bar.style.background=pct>=80?'#16a34a':pct>=60?'#f59e0b':'#dc2626';
+  setTimeout(()=>bar.style.width=pct+'%',100);
+  panel.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function retry(){
+  done=0;ok=0;err=0;
+  document.getElementById('s-done').textContent=0;
+  document.getElementById('s-ok').textContent=0;
+  document.getElementById('s-err').textContent=0;
+  document.getElementById('prog').style.width='0%';
+  document.getElementById('result').classList.remove('show');
+  build();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+build();
+</script>
+</body>
+</html>
