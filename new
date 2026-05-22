@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đề thi trắc nghiệm Ma trận - Tương tác</title>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['\\(', '\\)'], ['$', '$']], displayMath: [['\\[', '\\]']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+  <style>
+    :root{
+      --blue:#0f4aa8;
+      --blue2:#123b8f;
+      --light:#f5f8ff;
+      --line:#d8e3ff;
+      --green:#10a64a;
+      --red:#d93025;
+      --orange:#f59e0b;
+      --purple:#7c3aed;
+      --text:#132033;
+      --muted:#5e6b82;
+      --card:#ffffff;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      color:var(--text);
+      background:linear-gradient(135deg,#eef5ff,#fff7ed 55%,#f0fdf4);
+      line-height:1.55;
+    }
+    header{
+      position:sticky;
+      top:0;
+      z-index:10;
+      background:rgba(255,255,255,.94);
+      backdrop-filter: blur(12px);
+      border-bottom:1px solid var(--line);
+      box-shadow:0 4px 18px rgba(15,74,168,.08);
+    }
+    .topbar{
+      max-width:1180px;
+      margin:auto;
+      padding:16px 20px;
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:16px;
+      align-items:center;
+    }
+    .brand h1{margin:0;color:var(--blue2);font-size:28px;letter-spacing:.2px}
+    .brand p{margin:4px 0 0;color:var(--muted);font-size:14px}
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 14px;
+      border-radius:999px;
+      background:#fff3df;
+      color:#9a4f00;
+      font-weight:700;
+      border:1px solid #ffd59a;
+      white-space:nowrap;
+    }
+    main{max-width:1180px;margin:24px auto;padding:0 20px 40px}
+    .panel{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:14px;
+      margin-bottom:18px;
+    }
+    .stat{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+      box-shadow:0 8px 24px rgba(19,32,51,.06);
+    }
+    .stat span{display:block;color:var(--muted);font-size:13px}
+    .stat strong{font-size:24px;color:var(--blue2)}
+    .controls{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:18px;
+      box-shadow:0 8px 24px rgba(19,32,51,.06);
+    }
+    .filters{display:flex;flex-wrap:wrap;gap:8px}
+    button{
+      border:none;
+      cursor:pointer;
+      border-radius:12px;
+      padding:10px 13px;
+      font-weight:700;
+      transition:.18s ease;
+      font-size:14px;
+    }
+    .filter-btn{background:#eef4ff;color:var(--blue2);border:1px solid #cfe0ff}
+    .filter-btn.active,.filter-btn:hover{background:var(--blue);color:#fff}
+    .reset{background:#fff0f0;color:#b42318;border:1px solid #ffd1d1}
+    .reset:hover{background:#d93025;color:white}
+    .question{
+      background:rgba(255,255,255,.96);
+      border:1px solid var(--line);
+      border-left:7px solid var(--blue);
+      border-radius:20px;
+      margin:16px 0;
+      padding:18px;
+      box-shadow:0 10px 26px rgba(19,32,51,.07);
+    }
+    .question.easy{border-left-color:var(--green)}
+    .question.medium{border-left-color:var(--orange)}
+    .question.hard{border-left-color:var(--red)}
+    .question.theory{border-left-color:var(--purple)}
+    .meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;align-items:center}
+    .tag{font-size:12px;font-weight:800;padding:5px 9px;border-radius:999px;background:#eef4ff;color:var(--blue2)}
+    .tag.easy{background:#e9f9ef;color:#087836}
+    .tag.medium{background:#fff5df;color:#a15a00}
+    .tag.hard{background:#ffecec;color:#b42318}
+    .tag.theory{background:#f2eaff;color:#5b21b6}
+    .q-title{font-size:18px;font-weight:800;margin:8px 0 14px;color:#0d2450}
+    .options{display:grid;gap:10px;margin-top:10px}
+    .option{
+      width:100%;
+      text-align:left;
+      background:#f8fbff;
+      color:#17223a;
+      border:1px solid #dce7ff;
+      border-radius:14px;
+      padding:12px 14px;
+      font-weight:600;
+    }
+    .option:hover:not(:disabled){background:#edf5ff;transform:translateY(-1px)}
+    .option.correct{background:#dff7e8;border-color:#47c879;color:#075e2b}
+    .option.wrong{background:#ffe3e3;border-color:#f06a63;color:#9b1c13}
+    .option:disabled{cursor:not-allowed;opacity:.95}
+    .feedback{
+      display:none;
+      margin-top:14px;
+      padding:14px;
+      border-radius:16px;
+      background:#f7fbff;
+      border:1px dashed #bad0ff;
+    }
+    .feedback.show{display:block}
+    .feedback h4{margin:0 0 6px;color:var(--blue2)}
+    .explain{margin:6px 0}
+    .tip{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:12px;
+      background:#fff7e6;
+      border:1px solid #ffd89c;
+      color:#7a4300;
+    }
+    .footer-note{
+      text-align:center;
+      color:var(--muted);
+      margin-top:26px;
+      font-size:13px;
+    }
+    .hidden{display:none}
+    @media(max-width:850px){.panel{grid-template-columns:repeat(2,1fr)}.topbar{grid-template-columns:1fr}.brand h1{font-size:23px}.badge{width:max-content}}
+    @media(max-width:520px){.panel{grid-template-columns:1fr}.controls{align-items:stretch}.filters,.reset{width:100%}.filter-btn{flex:1}.q-title{font-size:16px}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="topbar">
+    <div class="brand">
+      <h1>ĐỀ THI TRẮC NGHIỆM MA TRẬN</h1>
+      <p>20 câu tương tác: 5 lý thuyết + 15 bài tập theo mức độ dễ, trung bình, khó</p>
+    </div>
+    <div class="badge">drDuyMT style · Hiểu bản chất rồi làm nhanh</div>
+  </div>
+</header>
+<main>
+  <section class="panel">
+    <div class="stat"><span>Tổng số câu</span><strong id="totalQ">20</strong></div>
+    <div class="stat"><span>Đã làm</span><strong id="doneQ">0</strong></div>
+    <div class="stat"><span>Số câu đúng</span><strong id="correctQ">0</strong></div>
+    <div class="stat"><span>Điểm tạm tính</span><strong id="scoreQ">0.0</strong></div>
+  </section>
+
+  <section class="controls">
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all">Tất cả</button>
+      <button class="filter-btn" data-filter="theory">Lý thuyết</button>
+      <button class="filter-btn" data-filter="easy">Dễ</button>
+      <button class="filter-btn" data-filter="medium">Trung bình</button>
+      <button class="filter-btn" data-filter="hard">Khó</button>
+    </div>
+    <button class="reset" onclick="resetQuiz()">Làm lại đề</button>
+  </section>
+
+  <section id="quiz"></section>
+  <p class="footer-note">Gợi ý: hãy làm theo cấu trúc “kích thước → điều kiện → công thức → tính toán”, không học ma trận như một đống công thức rời rạc.</p>
+</main>
+
+<script>
+const questions = [
+  {
+    id:1, type:'theory', level:'Lý thuyết',
+    question:'Ma trận cấp \(m\times n\) được hiểu đúng là gì?',
+    options:['Bảng số gồm \(m\) cột và \(n\) hàng','Bảng số gồm \(m\) hàng và \(n\) cột','Bảng số chỉ có một hàng','Bảng số luôn có số hàng bằng số cột'],
+    answer:1,
+    explain:'Ký hiệu \(A\in M_{m\times n}\) nghĩa là ma trận có \(m\) hàng và \(n\) cột. Thứ tự luôn là hàng trước, cột sau.',
+    tip:'Mẹo nhanh: đọc \(m\times n\) như “m hàng, n cột”.'
+  },
+  {
+    id:2, type:'theory', level:'Lý thuyết',
+    question:'Điều kiện để cộng hai ma trận \(A+B\) là gì?',
+    options:['Hai ma trận cùng số hàng','Hai ma trận cùng số cột','Hai ma trận cùng kích thước','Ma trận thứ nhất có số cột bằng số hàng của ma trận thứ hai'],
+    answer:2,
+    explain:'Cộng/trừ ma trận chỉ thực hiện được khi hai ma trận có cùng kích thước. Khi đó cộng từng phần tử tương ứng.',
+    tip:'Thấy cộng/trừ là kiểm tra “cùng nhà”: cùng hàng, cùng cột.'
+  },
+  {
+    id:3, type:'theory', level:'Lý thuyết',
+    question:'Điều kiện để tích \(AB\) xác định là gì?',
+    options:['Số hàng của \(A\) bằng số hàng của \(B\)','Số cột của \(A\) bằng số hàng của \(B\)','Số cột của \(A\) bằng số cột của \(B\)','Hai ma trận phải là ma trận vuông'],
+    answer:1,
+    explain:'Nếu \(A\in M_{m\times n}\), \(B\in M_{n\times p}\) thì \(AB\in M_{m\times p}\). Số cột của \(A\) phải bằng số hàng của \(B\).',
+    tip:'Mẹo kích thước: \((m\times n)(n\times p)\to m\times p\). Hai số giữa phải khớp.'
+  },
+  {
+    id:4, type:'theory', level:'Lý thuyết',
+    question:'Công thức chuyển vị của tích hai ma trận là công thức nào?',
+    options:['\((AB)^T=A^TB^T\)','\((AB)^T=B^TA^T\)','\((AB)^T=AB\)','\((AB)^T=A^{-1}B^{-1}\)'],
+    answer:1,
+    explain:'Khi chuyển vị một tích, thứ tự nhân bị đảo: \((AB)^T=B^TA^T\).',
+    tip:'Mẹo nhớ: chuyển vị giống “lật đoàn tàu”, toa cuối lên trước.'
+  },
+  {
+    id:5, type:'theory', level:'Lý thuyết',
+    question:'Ma trận vuông \(A\) có ma trận nghịch đảo khi nào?',
+    options:['Khi mọi phần tử của \(A\) đều khác 0','Khi \(\det(A)\ne 0\)','Khi \(A\) là ma trận hàng','Khi \(A^T=A\)'],
+    answer:1,
+    explain:'Với ma trận vuông, điều kiện quan trọng để tồn tại \(A^{-1}\) là \(\det(A)\ne0\).',
+    tip:'Mẹo thi: câu hỏi nghịch đảo thường kiểm tra ngay định thức khác 0.'
+  },
+  {
+    id:6, type:'easy', level:'Dễ',
+    question:'Cho \(A=\begin{bmatrix}1&2\\3&4\end{bmatrix}\), \(B=\begin{bmatrix}2&0\\1&5\end{bmatrix}\). Tính \(A+B\).',
+    options:['\(\begin{bmatrix}3&2\\4&9\end{bmatrix}\)','\(\begin{bmatrix}2&2\\3&20\end{bmatrix}\)','\(\begin{bmatrix}-1&2\\2&-1\end{bmatrix}\)','\(\begin{bmatrix}3&0\\1&9\end{bmatrix}\)'],
+    answer:0,
+    explain:'Cộng từng phần tử tương ứng: \(1+2=3\), \(2+0=2\), \(3+1=4\), \(4+5=9\).',
+    tip:'Đừng nhân nhầm: cộng ma trận là cộng từng ô cùng vị trí.'
+  },
+  {
+    id:7, type:'easy', level:'Dễ',
+    question:'Cho \(A=\begin{bmatrix}5&1\\2&3\end{bmatrix}\), \(B=\begin{bmatrix}2&4\\1&1\end{bmatrix}\). Tính \(A-B\).',
+    options:['\(\begin{bmatrix}7&5\\3&4\end{bmatrix}\)','\(\begin{bmatrix}3&-3\\1&2\end{bmatrix}\)','\(\begin{bmatrix}10&4\\2&3\end{bmatrix}\)','\(\begin{bmatrix}-3&3\\-1&-2\end{bmatrix}\)'],
+    answer:1,
+    explain:'Trừ từng phần tử tương ứng: \(5-2=3\), \(1-4=-3\), \(2-1=1\), \(3-1=2\).',
+    tip:'Khi trừ, cẩn thận dấu âm ở từng vị trí.'
+  },
+  {
+    id:8, type:'easy', level:'Dễ',
+    question:'Cho \(A=\begin{bmatrix}1&-2\\3&4\end{bmatrix}\). Tính \(2A\).',
+    options:['\(\begin{bmatrix}2&-4\\6&8\end{bmatrix}\)','\(\begin{bmatrix}3&0\\5&6\end{bmatrix}\)','\(\begin{bmatrix}2&-2\\3&8\end{bmatrix}\)','\(\begin{bmatrix}1&-4\\6&4\end{bmatrix}\)'],
+    answer:0,
+    explain:'Nhân ma trận với số thực là nhân từng phần tử với số đó.',
+    tip:'Nhân với số: quét toàn bộ ma trận, không bỏ sót ô nào.'
+  },
+  {
+    id:9, type:'easy', level:'Dễ',
+    question:'Chuyển vị của \(A=\begin{bmatrix}1&2&3\\4&5&6\end{bmatrix}\) là gì?',
+    options:['\(\begin{bmatrix}1&4\\2&5\\3&6\end{bmatrix}\)','\(\begin{bmatrix}1&2\\3&4\\5&6\end{bmatrix}\)','\(\begin{bmatrix}6&5&4\\3&2&1\end{bmatrix}\)','\(\begin{bmatrix}1&4&2\\5&3&6\end{bmatrix}\)'],
+    answer:0,
+    explain:'Chuyển vị biến hàng thành cột: hàng \([1,2,3]\) trở thành cột đầu theo từng phần tử tương ứng.',
+    tip:'Mẹo: vị trí \(a_{ij}\) đổi thành \(a_{ji}\).'
+  },
+  {
+    id:10, type:'easy', level:'Dễ',
+    question:'Ma trận \(A=\begin{bmatrix}1&2\\3&4\\5&6\end{bmatrix}\) có kích thước nào?',
+    options:['\(2\times3\)','\(3\times2\)','\(2\times2\)','\(3\times3\)'],
+    answer:1,
+    explain:'Ma trận có 3 hàng và 2 cột, nên kích thước là \(3\times2\).',
+    tip:'Đếm hàng ngang trước, cột dọc sau.'
+  },
+  {
+    id:11, type:'medium', level:'Trung bình',
+    question:'Cho \(A\in M_{2\times3}\), \(B\in M_{3\times4}\). Kích thước của \(AB\) là gì?',
+    options:['\(2\times4\)','\(3\times3\)','\(4\times2\)','Không xác định'],
+    answer:0,
+    explain:'Vì \((2\times3)(3\times4)\) có hai số giữa bằng nhau nên tích xác định và kết quả lấy hai số ngoài: \(2\times4\).',
+    tip:'Gạch hai số giữa, giữ hai số ngoài.'
+  },
+  {
+    id:12, type:'medium', level:'Trung bình',
+    question:'Cho \(A=\begin{bmatrix}1&2\\0&-1\end{bmatrix}\), \(B=\begin{bmatrix}3&1\\2&4\end{bmatrix}\). Tính \(AB\).',
+    options:['\(\begin{bmatrix}7&9\\-2&-4\end{bmatrix}\)','\(\begin{bmatrix}3&2\\2&-4\end{bmatrix}\)','\(\begin{bmatrix}5&5\\-2&-4\end{bmatrix}\)','\(\begin{bmatrix}7&9\\2&4\end{bmatrix}\)'],
+    answer:0,
+    explain:'Hàng nhân cột: ô (1,1) là \(1\cdot3+2\cdot2=7\); ô (1,2) là \(1\cdot1+2\cdot4=9\); hàng 2 cho \(-2,-4\).',
+    tip:'Lấy từng hàng của \(A\) “quét” từng cột của \(B\).'
+  },
+  {
+    id:13, type:'medium', level:'Trung bình',
+    question:'Tính \(\det(A)\) với \(A=\begin{bmatrix}2&3\\1&4\end{bmatrix}\).',
+    options:['5','8','11','-5'],
+    answer:0,
+    explain:'Với ma trận \(2\times2\), \(\det(A)=ad-bc=2\cdot4-3\cdot1=5\).',
+    tip:'Ma trận 2x2: nhân chéo chính trừ nhân chéo phụ.'
+  },
+  {
+    id:14, type:'medium', level:'Trung bình',
+    question:'Cho \(A=\begin{bmatrix}1&2\\3&4\end{bmatrix}\). Mệnh đề nào đúng?',
+    options:['\(A^T=A\)','\((A^T)^T=A\)','\(A^T=-A\)','\(A+A^T=0\)'],
+    answer:1,
+    explain:'Chuyển vị hai lần sẽ quay về ma trận ban đầu: \((A^T)^T=A\).',
+    tip:'Một lần lật đổi hàng-cột, hai lần lật trở về ban đầu.'
+  },
+  {
+    id:15, type:'medium', level:'Trung bình',
+    question:'Cho \(A=\begin{bmatrix}1&2\\3&4\end{bmatrix}\). Tính \(A^T+A\).',
+    options:['\(\begin{bmatrix}2&5\\5&8\end{bmatrix}\)','\(\begin{bmatrix}2&4\\6&8\end{bmatrix}\)','\(\begin{bmatrix}1&5\\5&4\end{bmatrix}\)','\(\begin{bmatrix}0&-1\\1&0\end{bmatrix}\)'],
+    answer:0,
+    explain:'\(A^T=\begin{bmatrix}1&3\\2&4\end{bmatrix}\). Cộng với \(A\) được \(\begin{bmatrix}2&5\\5&8\end{bmatrix}\).',
+    tip:'Tính chuyển vị trước, sau đó cộng từng phần tử.'
+  },
+  {
+    id:16, type:'hard', level:'Khó',
+    question:'Tìm \(A^{-1}\) với \(A=\begin{bmatrix}1&2\\3&4\end{bmatrix}\).',
+    options:['\(\begin{bmatrix}-2&1\\\frac32&-\frac12\end{bmatrix}\)','\(\begin{bmatrix}4&-2\\-3&1\end{bmatrix}\)','\(\begin{bmatrix}2&-1\\-\frac32&\frac12\end{bmatrix}\)','Không tồn tại'],
+    answer:0,
+    explain:'\(\det(A)=1\cdot4-2\cdot3=-2\ne0\). Do đó \(A^{-1}=\frac1{-2}\begin{bmatrix}4&-2\\-3&1\end{bmatrix}=\begin{bmatrix}-2&1\\\frac32&-\frac12\end{bmatrix}\).',
+    tip:'Nghịch đảo 2x2: đổi chỗ \(a,d\), đổi dấu \(b,c\), rồi chia cho định thức.'
+  },
+  {
+    id:17, type:'hard', level:'Khó',
+    question:'Cho \(A=\begin{bmatrix}1&0\\2&1\end{bmatrix}\), \(B=\begin{bmatrix}3&1\\4&2\end{bmatrix}\). Phát biểu nào đúng?',
+    options:['\(AB=BA\)','\(AB\ne BA\)','\(AB\) không xác định','\(BA\) không xác định'],
+    answer:1,
+    explain:'\(AB=\begin{bmatrix}3&1\\10&4\end{bmatrix}\), còn \(BA=\begin{bmatrix}5&1\\8&2\end{bmatrix}\). Hai kết quả khác nhau nên \(AB\ne BA\).',
+    tip:'Đừng mặc định ma trận giao hoán. Thường \(AB\ne BA\).'
+  },
+  {
+    id:18, type:'hard', level:'Khó',
+    question:'Cho hệ \(\begin{cases}2x+y=5\\x-y=1\end{cases}\). Viết dạng ma trận \(AX=B\), đâu là \(A\)?',
+    options:['\(\begin{bmatrix}2&1\\1&-1\end{bmatrix}\)','\(\begin{bmatrix}x\\y\end{bmatrix}\)','\(\begin{bmatrix}5\\1\end{bmatrix}\)','\(\begin{bmatrix}2&5\\1&1\end{bmatrix}\)'],
+    answer:0,
+    explain:'Ma trận \(A\) là ma trận hệ số của \(x,y\): hàng đầu \([2,1]\), hàng hai \([1,-1]\).',
+    tip:'Biến để vào \(X\), kết quả để vào \(B\), hệ số để vào \(A\).'
+  },
+  {
+    id:19, type:'hard', level:'Khó',
+    question:'Tính \(\det(A)\) với \(A=\begin{bmatrix}1&2&3\\0&-1&2\\1&0&1\end{bmatrix}\).',
+    options:['-4','4','0','6'],
+    answer:0,
+    explain:'Khai triển theo hàng đầu: \(1((-1)\cdot1-2\cdot0)-2(0\cdot1-2\cdot1)+3(0\cdot0-(-1)\cdot1)=-1+4+3=6\). Tuy nhiên cần chú ý dấu: với công thức \(a(ei-fh)-b(di-fg)+c(dh-eg)\), ta có \(1(-1)-2(-2)+3(1)=6\). Đáp án đúng là 6.',
+    tip:'Với 3x3, dùng công thức \(a(ei-fh)-b(di-fg)+c(dh-eg)\), nhớ dấu trừ ở hạng tử giữa.',
+    correction:true
+  },
+  {
+    id:20, type:'hard', level:'Khó',
+    question:'Cho \(A=\begin{bmatrix}5&3&2\\4&6&1\end{bmatrix}\), \(x=\begin{bmatrix}10\\20\\15\end{bmatrix}\). Tính \(y=Ax\).',
+    options:['\(\begin{bmatrix}140\\175\end{bmatrix}\)','\(\begin{bmatrix}10\\20\end{bmatrix}\)','\(\begin{bmatrix}130\\175\end{bmatrix}\)','\(\begin{bmatrix}140&175\end{bmatrix}\)'],
+    answer:0,
+    explain:'Hàng 1: \(5\cdot10+3\cdot20+2\cdot15=140\). Hàng 2: \(4\cdot10+6\cdot20+1\cdot15=175\).',
+    tip:'Kết quả là ma trận cột \(2\times1\), vì \((2\times3)(3\times1)=2\times1\).'
+  }
+];
+
+// Sửa dữ liệu câu 19 để đáp án trùng lời giải đúng.
+questions[18].answer = 3;
+
+let answered = new Set();
+let correct = new Set();
+
+function levelText(q){
+  if(q.type === 'theory') return 'Lý thuyết';
+  if(q.type === 'easy') return 'Bài tập dễ';
+  if(q.type === 'medium') return 'Bài tập trung bình';
+  return 'Bài tập khó';
+}
+
+function renderQuiz(){
+  const quiz = document.getElementById('quiz');
+  quiz.innerHTML = questions.map(q => `
+    <article class="question ${q.type}" data-type="${q.type}" id="q${q.id}">
+      <div class="meta">
+        <span class="tag ${q.type}">Câu ${q.id}</span>
+        <span class="tag ${q.type}">${levelText(q)}</span>
+      </div>
+      <div class="q-title">${q.question}</div>
+      <div class="options">
+        ${q.options.map((op, i) => `<button class="option" onclick="chooseAnswer(${q.id}, ${i}, this)">${String.fromCharCode(65+i)}. ${op}</button>`).join('')}
+      </div>
+      <div class="feedback" id="fb${q.id}">
+        <h4></h4>
+        <p class="explain"></p>
+        <div class="tip"></div>
+      </div>
+    </article>
+  `).join('');
+  if(window.MathJax) MathJax.typesetPromise();
+}
+
+function chooseAnswer(qid, choice, btn){
+  const q = questions.find(item => item.id === qid);
+  const card = document.getElementById(`q${qid}`);
+  const buttons = [...card.querySelectorAll('.option')];
+  if(answered.has(qid)) return;
+
+  answered.add(qid);
+  buttons.forEach((b, i) => {
+    b.disabled = true;
+    if(i === q.answer) b.classList.add('correct');
+  });
+
+  const fb = document.getElementById(`fb${qid}`);
+  const title = fb.querySelector('h4');
+  const exp = fb.querySelector('.explain');
+  const tip = fb.querySelector('.tip');
+
+  if(choice === q.answer){
+    correct.add(qid);
+    btn.classList.add('correct');
+    title.innerHTML = '✅ Chính xác!';
+  } else {
+    btn.classList.add('wrong');
+    title.innerHTML = `❌ Chưa đúng. Đáp án đúng là ${String.fromCharCode(65+q.answer)}.`;
+  }
+  exp.innerHTML = `<b>Giải thích:</b> ${q.explain}`;
+  tip.innerHTML = `<b>💡 Mẹo làm nhanh:</b> ${q.tip}`;
+  fb.classList.add('show');
+  updateStats();
+  if(window.MathJax) MathJax.typesetPromise([card]);
+}
+
+function updateStats(){
+  document.getElementById('doneQ').textContent = answered.size;
+  document.getElementById('correctQ').textContent = correct.size;
+  document.getElementById('scoreQ').textContent = (correct.size * 10 / questions.length).toFixed(1);
+}
+
+function resetQuiz(){
+  answered.clear();
+  correct.clear();
+  renderQuiz();
+  updateStats();
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('[data-filter="all"]').classList.add('active');
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const filter = btn.dataset.filter;
+    document.querySelectorAll('.question').forEach(card => {
+      card.classList.toggle('hidden', filter !== 'all' && card.dataset.type !== filter);
+    });
+  });
+});
+
+renderQuiz();
+updateStats();
+</script>
+</body>
+</html>
